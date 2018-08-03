@@ -1,0 +1,18 @@
+{
+    "name": "visuellverstehen/pull",
+    "description": "A little script to pull files and database from remote server.",
+    "license": [],
+    "authors": [
+        {
+            "name": "visuellverstehen",
+            "email": "kontakt@visuellverstehen.de",
+            "homepage": "https://www.visuellverstehen.de"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://composer.typo3.org/"
+        }
+    ]
+}
