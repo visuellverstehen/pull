@@ -156,10 +156,10 @@ echo ''
 echo '2/5 Synchronize files'
 echo '---------------------'
 if [ $software = 'typo3' ]; then
-  rsync -chavzP --stats $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/typo3/web/fileadmin/user_upload/ web/fileadmin/user_upload/
+  rsync -chavzP --delete --stats $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/typo3/web/fileadmin/user_upload/ web/fileadmin/user_upload/
 fi
 if [ $software = 'laravel' ]; then
-  rsync -chavzP --stats $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/laravel/storage/app/ storage/app/
+  rsync -chavzP --delete --stats $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/laravel/storage/app/ storage/app/
 fi
 echo ''
 
