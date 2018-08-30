@@ -73,9 +73,9 @@ while [ "$1" != "" ]; do
     shift
 done
 
-# Step 1: Gather variables
-echo '1/5 Gather variables'
-echo '--------------------'
+# Step 1: Gather parameters
+echo '1/6 Gather parameters'
+echo '---------------------'
 if [[ -z ${environment} ]];
 then
   read -p 'Environment [docker|local]: ' environment
@@ -153,7 +153,7 @@ echo 'Database filename:' $databaseFilename
 echo ''
 
 # Step 2: Synchronize files
-echo '2/5 Synchronize files'
+echo '2/6 Synchronize files'
 echo '---------------------'
 if [ $software = 'typo3' ]; then
   rsync -chavzP --delete --stats $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/typo3/web/fileadmin/user_upload/ web/fileadmin/user_upload/
@@ -164,7 +164,7 @@ fi
 echo ''
 
 # Step 3: Export database
-echo '3/5 Export database'
+echo '3/6 Export database'
 echo '-------------------'
 ssh $pNumber@$pNumber.mittwald.info << EOF
   cd html/
@@ -174,7 +174,7 @@ scp $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/$databaseFilename ./
 echo ''
 
 # Step 4: Import database
-echo '4/5 Import database'
+echo '4/6 Import database'
 echo '-------------------'
 if [ $environment = 'docker' ]; then
   docker cp $databaseFilename $dockerDatabaseHost:./$databaseFilename
@@ -186,7 +186,7 @@ fi
 echo ''
 
 # Step 5: Clean up
-echo '5/5 Clean up'
+echo '5/6 Clean up'
 echo '------------'
 rm $databaseFilename
 if [ $environment = 'docker' ]; then
@@ -195,3 +195,16 @@ fi
 ssh $pNumber@$pNumber.mittwald.info << EOF
   rm /home/www/$pNumber/html/$databaseFilename
 EOF
+echo ''
+
+# Step 6: Future help
+echo '6/6 Future help'
+echo '----------------------'
+echo 'Use this command in the future:'
+if [ $environment = 'docker' ]; then
+  echo './vendor/visuellverstehen/pull/pull.sh --environment="'$environment'" --p-number="'$pNumber'" --vvcode="'$vvcode'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'"'
+fi
+if [ $environment = 'local' ]; then
+  echo './vendor/visuellverstehen/pull/pull.sh --environment="'$environment'" --p-number="'$pNumber'" --vvcode="'$vvcode'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'" --local-database-user="'$localDatabaseUser'" --local-database-password="'$localDatabasePassword'" --local-database-host="'$localDatabaseHost'" --local-database-name="'$localDatabaseName'"'
+fi
+echo ''
