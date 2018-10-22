@@ -1,3 +1,5 @@
+[![Downloads](https://img.shields.io/packagist/dt/visuellverstehen/pull.svg)](https://packagist.org/packages/visuellverstehen/pull)
+
 # pull
 A little script to pull files and database from remote server. It is working for TYPO3 or Laravel projects. Also it works for development with docker.
 
