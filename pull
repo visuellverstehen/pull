@@ -202,9 +202,9 @@ echo '6/6 Future help'
 echo '----------------------'
 echo 'Use this command in the future:'
 if [ $environment = 'docker' ]; then
-  echo './vendor/visuellverstehen/pull/pull.sh --environment="'$environment'" --p-number="'$pNumber'" --vvcode="'$vvcode'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'"'
+  echo './vendor/bin/pull --environment="'$environment'" --p-number="'$pNumber'" --vvcode="'$vvcode'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'"'
 fi
 if [ $environment = 'local' ]; then
-  echo './vendor/visuellverstehen/pull/pull.sh --environment="'$environment'" --p-number="'$pNumber'" --vvcode="'$vvcode'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'" --local-database-user="'$localDatabaseUser'" --local-database-password="'$localDatabasePassword'" --local-database-host="'$localDatabaseHost'" --local-database-name="'$localDatabaseName'"'
+  echo './vendor/bin/pull --environment="'$environment'" --p-number="'$pNumber'" --vvcode="'$vvcode'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'" --local-database-user="'$localDatabaseUser'" --local-database-password="'$localDatabasePassword'" --local-database-host="'$localDatabaseHost'" --local-database-name="'$localDatabaseName'"'
 fi
 echo ''
