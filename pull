@@ -189,12 +189,15 @@ echo ''
 echo '5/6 Clean up'
 echo '------------'
 rm $databaseFilename
+echo 'Local SQL file was removed.'
 if [ $environment = 'docker' ]; then
   docker exec $dockerDatabaseHost rm ./$databaseFilename
+  echo 'SQL file in Docker container was removed.'
 fi
 ssh -T $pNumber@$pNumber.mittwald.info << EOF
   rm /home/www/$pNumber/html/$databaseFilename
 EOF
+echo 'Remote SQL file was removed.'
 echo ''
 
 # Step 6: Future help
