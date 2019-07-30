@@ -177,7 +177,7 @@ echo ''
 echo '4/6 Import database'
 echo '-------------------'
 if [ $environment = 'docker' ]; then
-  docker cp $databaseFilename $dockerDatabaseHost:./$databaseFilename
+  docker cp $databaseFilename $dockerDatabaseHost:/var/www/html/$databaseFilename
   docker-compose exec -T database mysql --user="$dockerDatabaseUser" --password="$dockerDatabasePassword" $dockerDatabaseName < $databaseFilename
 fi
 if [ $environment = 'local' ]; then
