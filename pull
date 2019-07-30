@@ -166,7 +166,7 @@ echo ''
 # Step 3: Export database
 echo '3/6 Export database'
 echo '-------------------'
-ssh $pNumber@$pNumber.mittwald.info << EOF
+ssh -T $pNumber@$pNumber.mittwald.info << EOF
   cd html/
   mysqldump --ignore-table=$remoteDatabaseName.be_sessions --ignore-table=$remoteDatabaseName.cache_md5params --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cf_cache_hash --ignore-table=$remoteDatabaseName.cf_cache_hash_tags --ignore-table=$remoteDatabaseName.cf_cache_imagesizes --ignore-table=$remoteDatabaseName.cf_cache_imagesizes_tags --ignore-table=$remoteDatabaseName.cf_cache_pages --ignore-table=$remoteDatabaseName.cf_cache_pages_tags --ignore-table=$remoteDatabaseName.cf_cache_pagesection --ignore-table=$remoteDatabaseName.cf_cache_pagesection_tags --ignore-table=$remoteDatabaseName.cf_cache_rootline --ignore-table=$remoteDatabaseName.cf_cache_rootline_tags --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap_tags --ignore-table=$remoteDatabaseName.cf_extbase_object --ignore-table=$remoteDatabaseName.cf_extbase_object_tags --ignore-table=$remoteDatabaseName.cf_extbase_reflection --ignore-table=$remoteDatabaseName.cf_extbase_reflection_tags --ignore-table=$remoteDatabaseName.tx_extensionmanager_domain_model_extension --ignore-table=$remoteDatabaseName.sys_log --ignore-table=$remoteDatabaseName.sys_domain --user="$remoteDatabaseUser" --password='$remoteDatabasePassword' --host="$remoteDatabaseHost" $remoteDatabaseName > $databaseFilename
 EOF
@@ -192,7 +192,7 @@ rm $databaseFilename
 if [ $environment = 'docker' ]; then
   docker exec $dockerDatabaseHost rm ./$databaseFilename
 fi
-ssh $pNumber@$pNumber.mittwald.info << EOF
+ssh -T $pNumber@$pNumber.mittwald.info << EOF
   rm /home/www/$pNumber/html/$databaseFilename
 EOF
 echo ''
