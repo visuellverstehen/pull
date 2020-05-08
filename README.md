@@ -1,7 +1,7 @@
 [![Downloads](https://img.shields.io/packagist/dt/visuellverstehen/pull.svg)](https://packagist.org/packages/visuellverstehen/pull)
 
 # pull
-A little script to pull files and database from remote server. It is working for TYPO3 or Laravel projects. Also it works for development with docker.
+A little script to pull images and database from remote server. It is working for TYPO3 or Laravel projects.
 
 ## How to use
 1. Install package via [composer](https://packagist.org/packages/visuellverstehen/pull).
