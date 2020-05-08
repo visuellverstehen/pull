@@ -114,10 +114,10 @@ echo ''
 echo '2/6 Synchronize images'
 echo '---------------------'
 if [ $software = 'typo3' ]; then
-  rsync -chavzP --delete --stats $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/typo3/web/fileadmin/ web/fileadmin/
+  rsync -chavzP --delete --stats --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/typo3/web/fileadmin/ web/fileadmin/
 fi
 if [ $software = 'laravel' ]; then
-  rsync -chavzP --delete --stats $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/laravel/storage/app/ storage/app/
+  rsync -chavzP --delete --stats --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/laravel/storage/app/ storage/app/
 fi
 echo ''
 
