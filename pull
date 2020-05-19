@@ -15,6 +15,7 @@ while [ "$1" != "" ]; do
           echo '  --software'
           echo '  --vvcode'
           echo '  --p-number'
+          echo '  --exclude-path'
           echo '  --remote-database-user'
           echo '  --remote-database-password'
           echo '  --remote-database-host'
@@ -29,6 +30,9 @@ while [ "$1" != "" ]; do
           ;;
         --p-number)
           pNumber=$value
+          ;;
+        --exclude-path)
+          excludePath=$value
           ;;
         --remote-database-user)
           remoteDatabaseUser=$value
@@ -98,6 +102,7 @@ then
 else
   echo 'Remote database name: '$remoteDatabaseName
 fi
+echo 'Exclude path: '$excludePath
 dockerDatabaseUser=$vvcode
 echo 'Docker database user: '$dockerDatabaseUser
 dockerDatabasePassword=$vvcode
@@ -114,10 +119,10 @@ echo ''
 echo '2/6 Synchronize images'
 echo '---------------------'
 if [ $software = 'typo3' ]; then
-  rsync -chavzP --delete --stats --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/typo3/web/fileadmin/ web/fileadmin/
+  rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/typo3/web/fileadmin/ web/fileadmin/
 fi
 if [ $software = 'laravel' ]; then
-  rsync -chavzP --delete --stats --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/laravel/storage/app/ storage/app/
+  rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/laravel/storage/app/ storage/app/
 fi
 echo ''
 
@@ -155,5 +160,5 @@ echo ''
 echo '6/6 Future help'
 echo '----------------------'
 echo 'Use this command in the future:'
-echo './vendor/bin/pull --p-number="'$pNumber'" --vvcode="'$vvcode'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'"'
+echo './vendor/bin/pull --p-number="'$pNumber'" --vvcode="'$vvcode'" --exclude-path="'$excludePath'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'"'
 echo ''
