@@ -1,6 +1,6 @@
 {
     "name": "visuellverstehen/pull",
-    "description": "A little script to pull files and database from remote server.",
+    "description": "A little script to pull images and database from remote server.",
     "license": "MIT",
     "authors": [
         {
