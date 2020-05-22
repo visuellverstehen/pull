@@ -12,6 +12,7 @@ while [ "$1" != "" ]; do
           echo 'Help'
           echo '----'
           echo 'Possible parameter:'
+          echo '  --environment'
           echo '  --software'
           echo '  --vvcode'
           echo '  --p-number'
@@ -21,6 +22,9 @@ while [ "$1" != "" ]; do
           echo '  --remote-database-host'
           echo '  --remote-database-name'
           exit 1
+          ;;
+        --environment)
+          environment=$value
           ;;
         --software)
           software=$value
@@ -46,6 +50,18 @@ while [ "$1" != "" ]; do
         --remote-database-name)
           remoteDatabaseName=$value
           ;;
+        --local-database-user)
+          localDatabaseUser=$value
+          ;;
+        --local-database-password)
+          localDatabasePassword=$value
+          ;;
+        --local-database-host)
+          localDatabaseHost=$value
+          ;;
+        --local-database-name)
+          localDatabaseName=$value
+          ;;
         *)
           echo 'Error'
           echo '-----'
@@ -60,6 +76,12 @@ done
 # Step 1: Gather parameters
 echo '1/6 Gather parameters'
 echo '---------------------'
+if [[ -z ${environment} ]];
+then
+  read -p 'Environment [docker|local]: ' environment
+else
+  echo 'Environment [docker|local]: '$environment
+fi
 if [[ -z ${software} ]];
 then
   read -p 'Software [typo3|laravel]: ' software
@@ -103,14 +125,44 @@ else
   echo 'Remote database name: '$remoteDatabaseName
 fi
 echo 'Exclude path: '$excludePath
-dockerDatabaseUser=$vvcode
-echo 'Docker database user: '$dockerDatabaseUser
-dockerDatabasePassword=$vvcode
-echo 'Docker database password: '$dockerDatabasePassword
-dockerDatabaseHost=$vvcode'_database'
-echo 'Docker database host: '$dockerDatabaseHost
-dockerDatabaseName=$vvcode
-echo 'Docker database name: '$dockerDatabaseName
+if [ $environment = 'docker' ];
+then
+  dockerDatabaseUser=$vvcode
+  echo 'Docker database user: '$dockerDatabaseUser
+  dockerDatabasePassword=$vvcode
+  echo 'Docker database password: '$dockerDatabasePassword
+  dockerDatabaseHost=$vvcode'_database'
+  echo 'Docker database host: '$dockerDatabaseHost
+  dockerDatabaseName=$vvcode
+  echo 'Docker database name: '$dockerDatabaseName
+fi
+if [ $environment = 'local' ];
+then
+  if [[ -z ${localDatabaseUser} ]];
+  then
+    read -p 'Local database user: ' localDatabaseUser
+  else
+    echo 'Local database user: '$localDatabaseUser
+  fi
+  if [[ -z ${localDatabasePassword} ]];
+  then
+    read -p 'Local database password: ' localDatabasePassword
+  else
+    echo 'Local database password: '$localDatabasePassword
+  fi
+  if [[ -z ${localDatabaseHost} ]];
+  then
+    read -p 'Local database host: ' localDatabaseHost
+  else
+    echo 'Local database host: '$localDatabaseHost
+  fi
+  if [[ -z ${localDatabaseName} ]];
+  then
+    read -p 'Local database name: ' localDatabaseName
+  else
+    echo 'Local database name: '$localDatabaseName
+  fi
+fi
 databaseFilename='export-'$(date +%s)'.sql'
 echo 'Database filename:' $databaseFilename
 echo ''
@@ -118,10 +170,12 @@ echo ''
 # Step 2: Synchronize images
 echo '2/6 Synchronize images'
 echo '---------------------'
-if [ $software = 'typo3' ]; then
+if [ $software = 'typo3' ];
+then
   rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/typo3/web/fileadmin/ web/fileadmin/
 fi
-if [ $software = 'laravel' ]; then
+if [ $software = 'laravel' ];
+then
   rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/laravel/storage/app/ storage/app/
 fi
 echo ''
@@ -139,8 +193,15 @@ echo ''
 # Step 4: Import database
 echo '4/6 Import database'
 echo '-------------------'
-docker cp $databaseFilename $dockerDatabaseHost:/var/www/html/$databaseFilename
-docker-compose exec -T database mysql --user="$dockerDatabaseUser" --password="$dockerDatabasePassword" $dockerDatabaseName < $databaseFilename
+if [ $environment = 'docker' ];
+then
+  docker cp $databaseFilename $dockerDatabaseHost:/var/www/html/$databaseFilename
+  docker-compose exec -T database mysql --user="$dockerDatabaseUser" --password="$dockerDatabasePassword" $dockerDatabaseName < $databaseFilename
+fi
+if [ $environment = 'local' ];
+then
+  mysql --user="$localDatabaseUser" --password="$localDatabasePassword" --host="$localDatabaseHost" $localDatabaseName < $databaseFilename
+fi
 echo ''
 
 # Step 5: Clean up
@@ -148,8 +209,6 @@ echo '5/6 Clean up'
 echo '------------'
 rm $databaseFilename
 echo 'Local SQL file was removed.'
-docker exec $dockerDatabaseHost rm ./$databaseFilename
-echo 'SQL file in Docker container was removed.'
 ssh -T $pNumber@$pNumber.mittwald.info << EOF
   rm /home/www/$pNumber/tmp/$databaseFilename
 EOF
@@ -160,5 +219,12 @@ echo ''
 echo '6/6 Future help'
 echo '----------------------'
 echo 'Use this command in the future:'
-echo './vendor/bin/pull --p-number="'$pNumber'" --vvcode="'$vvcode'" --exclude-path="'$excludePath'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'"'
+if [ $environment = 'docker' ];
+then
+  echo './vendor/bin/pull --environment="'$environment'" --p-number="'$pNumber'" --vvcode="'$vvcode'" --exclude-path="'$excludePath'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'"'
+fi
+if [ $environment = 'local' ];
+then
+  echo './vendor/bin/pull --environment="'$environment'" --p-number="'$pNumber'" --vvcode="'$vvcode'" --exclude-path="'$excludePath'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'" --local-database-user="'$localDatabaseUser'" --local-database-password="'$localDatabasePassword'" --local-database-host="'$localDatabaseHost'" --local-database-name="'$localDatabaseName'"'
+fi
 echo ''
