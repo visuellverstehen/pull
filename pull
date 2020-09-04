@@ -172,22 +172,22 @@ echo '2/6 Synchronize images'
 echo '---------------------'
 if [ $software = 'typo3' ];
 then
-  rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/typo3/web/fileadmin/ web/fileadmin/
+  rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $pNumber@$pNumber.mittwaldserver.info:/home/www/$pNumber/html/typo3/web/fileadmin/ web/fileadmin/
 fi
 if [ $software = 'laravel' ];
 then
-  rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/html/laravel/storage/app/ storage/app/
+  rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $pNumber@$pNumber.mittwaldserver.info:/home/www/$pNumber/html/laravel/storage/app/ storage/app/
 fi
 echo ''
 
 # Step 3: Export database
 echo '3/6 Export database'
 echo '-------------------'
-ssh -T $pNumber@$pNumber.mittwald.info << EOF
+ssh -T $pNumber@$pNumber.mittwaldserver.info << EOF
   cd html/
   mysqldump --ignore-table=$remoteDatabaseName.be_sessions --ignore-table=$remoteDatabaseName.cache_md5params --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cf_cache_hash --ignore-table=$remoteDatabaseName.cf_cache_hash_tags --ignore-table=$remoteDatabaseName.cf_cache_imagesizes --ignore-table=$remoteDatabaseName.cf_cache_imagesizes_tags --ignore-table=$remoteDatabaseName.cf_cache_pages --ignore-table=$remoteDatabaseName.cf_cache_pages_tags --ignore-table=$remoteDatabaseName.cf_cache_pagesection --ignore-table=$remoteDatabaseName.cf_cache_pagesection_tags --ignore-table=$remoteDatabaseName.cf_cache_rootline --ignore-table=$remoteDatabaseName.cf_cache_rootline_tags --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap_tags --ignore-table=$remoteDatabaseName.cf_extbase_object --ignore-table=$remoteDatabaseName.cf_extbase_object_tags --ignore-table=$remoteDatabaseName.cf_extbase_reflection --ignore-table=$remoteDatabaseName.cf_extbase_reflection_tags --ignore-table=$remoteDatabaseName.tx_extensionmanager_domain_model_extension --ignore-table=$remoteDatabaseName.sys_log --ignore-table=$remoteDatabaseName.sys_domain --user="$remoteDatabaseUser" --password='$remoteDatabasePassword' --host="$remoteDatabaseHost" $remoteDatabaseName > /tmp/$databaseFilename
 EOF
-scp $pNumber@$pNumber.mittwald.info:/home/www/$pNumber/tmp/$databaseFilename ./
+scp $pNumber@$pNumber.mittwaldserver.info:/home/www/$pNumber/tmp/$databaseFilename ./
 echo ''
 
 # Step 4: Import database
@@ -209,7 +209,7 @@ echo '5/6 Clean up'
 echo '------------'
 rm $databaseFilename
 echo 'Local SQL file was removed.'
-ssh -T $pNumber@$pNumber.mittwald.info << EOF
+ssh -T $pNumber@$pNumber.mittwaldserver.info << EOF
   rm /home/www/$pNumber/tmp/$databaseFilename
 EOF
 echo 'Remote SQL file was removed.'
