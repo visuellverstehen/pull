@@ -81,8 +81,8 @@ while [ "$1" != "" ]; do
     shift
 done
 
-# Step 1: Gather parameters
-echo '1/6 Gather parameters'
+# Gather parameters
+echo 'Gather parameters'
 echo '---------------------'
 if [[ -z ${environment} ]];
 then
@@ -92,9 +92,9 @@ else
 fi
 if [[ -z ${software} ]];
 then
-  read -p 'Software [typo3|laravel]: ' software
+  read -p 'Software [typo3|laravel|statamic]: ' software
 else
-  echo 'Software [typo3|laravel]: '$software
+  echo 'Software [typo3|laravel|statamic]: '$software
 fi
 if [[ -z ${hoster} ]];
 then
@@ -204,8 +204,8 @@ echo 'Using the following server address and path:' $serverAddressAndPath
 echo ''
 
 
-# Step 2: Synchronize images
-echo '2/6 Synchronize images'
+# Synchronize images
+echo 'Synchronize images'
 echo '---------------------'
 if [ $software = 'typo3' ];
 then
@@ -215,10 +215,29 @@ if [ $software = 'laravel' ];
 then
   rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/storage/app/ storage/app/
 fi
+if [ $software = 'statamic' ];
+then
+  rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/public/assets/ public/assets/
+fi
 echo ''
 
-# Step 3: Export database
-echo '3/6 Export database'
+# Pull content folder from remote
+if [ $software = 'statamic' ];
+then
+  echo 'Pull content folder from remote'
+  echo '-------------------'
+  rsync -chavzP --delete --stats $serverAddressAndPath/content/ content/
+fi
+echo ''
+
+# Skip database import if variable is empty
+if [[ -z ${remoteDatabaseUser} ]];
+then
+    echo 'Skip database sync'
+    echo '-------------------'
+else
+# Export database
+echo 'Export database'
 echo '-------------------'
 if [ $hoster = 'mittwald' ];
 then
@@ -233,8 +252,8 @@ EOF
 scp $remoteServerUser@$remoteServerHost:$serverPath'/tmp/'$databaseFilename ./
 echo ''
 
-# Step 4: Import database
-echo '4/6 Import database'
+# Import database
+echo 'Import database'
 echo '-------------------'
 if [ $environment = 'docker' ];
 then
@@ -247,8 +266,8 @@ then
 fi
 echo ''
 
-# Step 5: Clean up
-echo '5/6 Clean up'
+# Clean up
+echo 'Clean up'
 echo '------------'
 rm $databaseFilename
 echo 'Local SQL file was removed.'
@@ -264,9 +283,10 @@ EOF
 fi
 echo 'Remote SQL file was removed.'
 echo ''
+fi
 
-# Step 6: Future help
-echo '6/6 Future help'
+# Future help
+echo 'Future help'
 echo '----------------------'
 echo 'Use this command in the future:'
 if [ $environment = 'docker' ];
