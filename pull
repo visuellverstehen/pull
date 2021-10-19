@@ -254,7 +254,7 @@ echo ''
 
 # Import database
 echo 'Import database'
-echo '-------------------'
+echo '---------------'
 if [ $environment = 'docker' ];
 then
   docker cp $databaseFilename $dockerDatabaseHost:/var/www/html/$databaseFilename
