@@ -206,7 +206,7 @@ echo ''
 
 # Synchronize images
 echo 'Synchronize images'
-echo '---------------------'
+echo '-----------------'
 if [ $software = 'typo3' ];
 then
   rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/web/fileadmin/ web/fileadmin/
