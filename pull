@@ -287,7 +287,7 @@ fi
 
 # Future help
 echo 'Future help'
-echo '----------------------'
+echo '-----------'
 echo 'Use this command in the future:'
 if [ $environment = 'docker' ];
 then
