@@ -268,7 +268,7 @@ echo ''
 
 # Clean up
 echo 'Clean up'
-echo '------------'
+echo '--------'
 rm $databaseFilename
 echo 'Local SQL file was removed.'
 if [ $hoster = 'mittwald' ];
