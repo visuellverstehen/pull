@@ -83,7 +83,7 @@ done
 
 # Gather parameters
 echo 'Gather parameters'
-echo '---------------------'
+echo '-----------------'
 if [[ -z ${environment} ]];
 then
   read -p 'Environment [docker|local]: ' environment
