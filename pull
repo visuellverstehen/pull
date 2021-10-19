@@ -238,7 +238,7 @@ then
 else
 # Export database
 echo 'Export database'
-echo '-------------------'
+echo '---------------'
 if [ $hoster = 'mittwald' ];
 then
     serverPath='/html'
