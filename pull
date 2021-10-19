@@ -224,7 +224,7 @@ echo ''
 # Pull content folder from remote
 if [ $software = 'statamic' ];
 then
-  echo 'Pull content folder from remote'
+  echo 'Synchronize texts'
   echo '-------------------'
   rsync -chavzP --delete --stats $serverAddressAndPath/content/ content/
 fi
