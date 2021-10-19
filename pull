@@ -221,7 +221,7 @@ then
 fi
 echo ''
 
-# Pull content folder from remote
+# Synchronize texts
 if [ $software = 'statamic' ];
 then
   echo 'Synchronize texts'
