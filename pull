@@ -203,7 +203,6 @@ fi
 echo 'Using the following server address and path:' $serverAddressAndPath
 echo ''
 
-
 # Synchronize images
 echo 'Synchronize images'
 echo '-----------------'
@@ -230,59 +229,59 @@ then
 fi
 echo ''
 
-# Skip database import if variable is empty
+# Skip database synchronization, if remote database user is empty
 if [[ -z ${remoteDatabaseUser} ]];
 then
-  echo 'Skip database sync'
-  echo '------------------'
+  echo 'Skip database synchronization'
+  echo '-----------------------------'
 else
-# Export database
-echo 'Export database'
-echo '---------------'
-if [ $hoster = 'mittwald' ];
-then
-  serverPath='/html'
-else
-  serverPath='/home/forge/'$remoteServerHost
-fi
-ssh -T $remoteServerUser@$remoteServerHost << EOF
-  cd $serverPath/ && mkdir -p tmp
-  mysqldump --ignore-table=$remoteDatabaseName.be_sessions --ignore-table=$remoteDatabaseName.cache_md5params --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cf_cache_hash --ignore-table=$remoteDatabaseName.cf_cache_hash_tags --ignore-table=$remoteDatabaseName.cf_cache_imagesizes --ignore-table=$remoteDatabaseName.cf_cache_imagesizes_tags --ignore-table=$remoteDatabaseName.cf_cache_pages --ignore-table=$remoteDatabaseName.cf_cache_pages_tags --ignore-table=$remoteDatabaseName.cf_cache_pagesection --ignore-table=$remoteDatabaseName.cf_cache_pagesection_tags --ignore-table=$remoteDatabaseName.cf_cache_rootline --ignore-table=$remoteDatabaseName.cf_cache_rootline_tags --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap_tags --ignore-table=$remoteDatabaseName.cf_extbase_object --ignore-table=$remoteDatabaseName.cf_extbase_object_tags --ignore-table=$remoteDatabaseName.cf_extbase_reflection --ignore-table=$remoteDatabaseName.cf_extbase_reflection_tags --ignore-table=$remoteDatabaseName.tx_extensionmanager_domain_model_extension --ignore-table=$remoteDatabaseName.sys_log --ignore-table=$remoteDatabaseName.sys_domain --user="$remoteDatabaseUser" --password='$remoteDatabasePassword' --host="$remoteDatabaseHost" $remoteDatabaseName > tmp/$databaseFilename
-EOF
-scp $remoteServerUser@$remoteServerHost:$serverPath'/tmp/'$databaseFilename ./
-echo ''
+  # Export database
+  echo 'Export database'
+  echo '---------------'
+  if [ $hoster = 'mittwald' ];
+  then
+    serverPath='/home/www/'$remoteServerUser
+  else
+    serverPath='/home/forge/'$remoteServerHost
+  fi
+  ssh -T $remoteServerUser@$remoteServerHost "
+    cd $serverPath/ && mkdir -p tmp
+    mysqldump --ignore-table=$remoteDatabaseName.be_sessions --ignore-table=$remoteDatabaseName.cache_md5params --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cf_cache_hash --ignore-table=$remoteDatabaseName.cf_cache_hash_tags --ignore-table=$remoteDatabaseName.cf_cache_imagesizes --ignore-table=$remoteDatabaseName.cf_cache_imagesizes_tags --ignore-table=$remoteDatabaseName.cf_cache_pages --ignore-table=$remoteDatabaseName.cf_cache_pages_tags --ignore-table=$remoteDatabaseName.cf_cache_pagesection --ignore-table=$remoteDatabaseName.cf_cache_pagesection_tags --ignore-table=$remoteDatabaseName.cf_cache_rootline --ignore-table=$remoteDatabaseName.cf_cache_rootline_tags --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap_tags --ignore-table=$remoteDatabaseName.cf_extbase_object --ignore-table=$remoteDatabaseName.cf_extbase_object_tags --ignore-table=$remoteDatabaseName.cf_extbase_reflection --ignore-table=$remoteDatabaseName.cf_extbase_reflection_tags --ignore-table=$remoteDatabaseName.tx_extensionmanager_domain_model_extension --ignore-table=$remoteDatabaseName.sys_log --ignore-table=$remoteDatabaseName.sys_domain --user="$remoteDatabaseUser" --password='$remoteDatabasePassword' --host="$remoteDatabaseHost" $remoteDatabaseName > tmp/$databaseFilename
+  "
+  scp $remoteServerUser@$remoteServerHost:$serverPath'/tmp/'$databaseFilename ./
+  echo ''
 
-# Import database
-echo 'Import database'
-echo '---------------'
-if [ $environment = 'docker' ];
-then
-  docker cp $databaseFilename $dockerDatabaseHost:/var/www/html/$databaseFilename
-  docker-compose exec -T database mysql --user="$dockerDatabaseUser" --password="$dockerDatabasePassword" $dockerDatabaseName < $databaseFilename
-fi
-if [ $environment = 'local' ];
-then
-  mysql --user="$localDatabaseUser" --password="$localDatabasePassword" --host="$localDatabaseHost" $localDatabaseName < $databaseFilename
-fi
-echo ''
+  # Import database
+  echo 'Import database'
+  echo '---------------'
+  if [ $environment = 'docker' ];
+  then
+    docker cp $databaseFilename $dockerDatabaseHost:/var/www/html/$databaseFilename
+    docker-compose exec -T database mysql --user="$dockerDatabaseUser" --password="$dockerDatabasePassword" $dockerDatabaseName < $databaseFilename
+  fi
+  if [ $environment = 'local' ];
+  then
+    mysql --user="$localDatabaseUser" --password="$localDatabasePassword" --host="$localDatabaseHost" $localDatabaseName < $databaseFilename
+  fi
+  echo ''
 
-# Clean up
-echo 'Clean up'
-echo '--------'
-rm $databaseFilename
-echo 'Local SQL file was removed.'
-if [ $hoster = 'mittwald' ];
-then
-  ssh -T $remoteServerUser@$remoteServerHost << EOF
-  rm /home/www/$remoteServerUser/tmp/$databaseFilename
-EOF
-else
-  ssh -T $remoteServerUser@$remoteServerHost << EOF
-  rm /home/forge/$remoteServerHost/tmp/$databaseFilename
-EOF
-fi
-echo 'Remote SQL file was removed.'
-echo ''
+  # Clean up database files
+  echo 'Clean up database files'
+  echo '-----------------------'
+  rm $databaseFilename
+  echo 'Local SQL file was removed.'
+  if [ $hoster = 'mittwald' ];
+  then
+    ssh -T $remoteServerUser@$remoteServerHost "
+    rm /home/www/$remoteServerUser/tmp/$databaseFilename
+    "
+  else
+    ssh -T $remoteServerUser@$remoteServerHost "
+    rm /home/forge/$remoteServerHost/tmp/$databaseFilename
+    "
+  fi
+  echo 'Remote SQL file was removed.'
+  echo ''
 fi
 
 # Future help
