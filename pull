@@ -3,7 +3,7 @@ echo 'pull'
 echo '===='
 echo ''
 
-# Step 0: Handle parameter
+# Handle parameter
 while [ "$1" != "" ]; do
     parameter=`echo $1 | awk -F= '{print $1}'`
     value=`echo $1 | awk -F= '{print $2}'`
@@ -225,7 +225,7 @@ echo ''
 if [ $software = 'statamic' ];
 then
   echo 'Synchronize texts'
-  echo '-------------------'
+  echo '-----------------'
   rsync -chavzP --delete --stats $serverAddressAndPath/content/ content/
 fi
 echo ''
@@ -233,21 +233,21 @@ echo ''
 # Skip database import if variable is empty
 if [[ -z ${remoteDatabaseUser} ]];
 then
-    echo 'Skip database sync'
-    echo '-------------------'
+  echo 'Skip database sync'
+  echo '------------------'
 else
 # Export database
 echo 'Export database'
 echo '---------------'
 if [ $hoster = 'mittwald' ];
 then
-    serverPath='/html'
+  serverPath='/html'
 else
-    serverPath='/home/forge/'$remoteServerHost
+  serverPath='/home/forge/'$remoteServerHost
 fi
 ssh -T $remoteServerUser@$remoteServerHost << EOF
-  cd $serverPath/ && mkdir -p tmp
-  mysqldump --ignore-table=$remoteDatabaseName.be_sessions --ignore-table=$remoteDatabaseName.cache_md5params --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cf_cache_hash --ignore-table=$remoteDatabaseName.cf_cache_hash_tags --ignore-table=$remoteDatabaseName.cf_cache_imagesizes --ignore-table=$remoteDatabaseName.cf_cache_imagesizes_tags --ignore-table=$remoteDatabaseName.cf_cache_pages --ignore-table=$remoteDatabaseName.cf_cache_pages_tags --ignore-table=$remoteDatabaseName.cf_cache_pagesection --ignore-table=$remoteDatabaseName.cf_cache_pagesection_tags --ignore-table=$remoteDatabaseName.cf_cache_rootline --ignore-table=$remoteDatabaseName.cf_cache_rootline_tags --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap_tags --ignore-table=$remoteDatabaseName.cf_extbase_object --ignore-table=$remoteDatabaseName.cf_extbase_object_tags --ignore-table=$remoteDatabaseName.cf_extbase_reflection --ignore-table=$remoteDatabaseName.cf_extbase_reflection_tags --ignore-table=$remoteDatabaseName.tx_extensionmanager_domain_model_extension --ignore-table=$remoteDatabaseName.sys_log --ignore-table=$remoteDatabaseName.sys_domain --user="$remoteDatabaseUser" --password='$remoteDatabasePassword' --host="$remoteDatabaseHost" $remoteDatabaseName > tmp/$databaseFilename
+cd $serverPath/ && mkdir -p tmp
+mysqldump --ignore-table=$remoteDatabaseName.be_sessions --ignore-table=$remoteDatabaseName.cache_md5params --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cf_cache_hash --ignore-table=$remoteDatabaseName.cf_cache_hash_tags --ignore-table=$remoteDatabaseName.cf_cache_imagesizes --ignore-table=$remoteDatabaseName.cf_cache_imagesizes_tags --ignore-table=$remoteDatabaseName.cf_cache_pages --ignore-table=$remoteDatabaseName.cf_cache_pages_tags --ignore-table=$remoteDatabaseName.cf_cache_pagesection --ignore-table=$remoteDatabaseName.cf_cache_pagesection_tags --ignore-table=$remoteDatabaseName.cf_cache_rootline --ignore-table=$remoteDatabaseName.cf_cache_rootline_tags --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap_tags --ignore-table=$remoteDatabaseName.cf_extbase_object --ignore-table=$remoteDatabaseName.cf_extbase_object_tags --ignore-table=$remoteDatabaseName.cf_extbase_reflection --ignore-table=$remoteDatabaseName.cf_extbase_reflection_tags --ignore-table=$remoteDatabaseName.tx_extensionmanager_domain_model_extension --ignore-table=$remoteDatabaseName.sys_log --ignore-table=$remoteDatabaseName.sys_domain --user="$remoteDatabaseUser" --password='$remoteDatabasePassword' --host="$remoteDatabaseHost" $remoteDatabaseName > tmp/$databaseFilename
 EOF
 scp $remoteServerUser@$remoteServerHost:$serverPath'/tmp/'$databaseFilename ./
 echo ''
@@ -273,12 +273,12 @@ rm $databaseFilename
 echo 'Local SQL file was removed.'
 if [ $hoster = 'mittwald' ];
 then
-    ssh -T $remoteServerUser@$remoteServerHost << EOF
-    rm /home/www/$remoteServerUser/tmp/$databaseFilename
+  ssh -T $remoteServerUser@$remoteServerHost << EOF
+  rm /home/www/$remoteServerUser/tmp/$databaseFilename
 EOF
 else
-    ssh -T $remoteServerUser@$remoteServerHost << EOF
-    rm /home/forge/$remoteServerHost/tmp/$databaseFilename
+  ssh -T $remoteServerUser@$remoteServerHost << EOF
+  rm /home/forge/$remoteServerHost/tmp/$databaseFilename
 EOF
 fi
 echo 'Remote SQL file was removed.'
