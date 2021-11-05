@@ -3,7 +3,7 @@ echo 'pull'
 echo '===='
 echo ''
 
-# Step 0: Handle parameter
+# Handle parameter
 while [ "$1" != "" ]; do
     parameter=`echo $1 | awk -F= '{print $1}'`
     value=`echo $1 | awk -F= '{print $2}'`
@@ -81,9 +81,9 @@ while [ "$1" != "" ]; do
     shift
 done
 
-# Step 1: Gather parameters
-echo '1/6 Gather parameters'
-echo '---------------------'
+# Gather parameters
+echo 'Gather parameters'
+echo '-----------------'
 if [[ -z ${environment} ]];
 then
   read -p 'Environment [docker|local]: ' environment
@@ -92,9 +92,9 @@ else
 fi
 if [[ -z ${software} ]];
 then
-  read -p 'Software [typo3|laravel]: ' software
+  read -p 'Software [typo3|laravel|statamic]: ' software
 else
-  echo 'Software [typo3|laravel]: '$software
+  echo 'Software [typo3|laravel|statamic]: '$software
 fi
 if [[ -z ${hoster} ]];
 then
@@ -203,10 +203,9 @@ fi
 echo 'Using the following server address and path:' $serverAddressAndPath
 echo ''
 
-
-# Step 2: Synchronize images
-echo '2/6 Synchronize images'
-echo '---------------------'
+# Synchronize images
+echo 'Synchronize images'
+echo '-----------------'
 if [ $software = 'typo3' ];
 then
   rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/web/fileadmin/ web/fileadmin/
@@ -215,59 +214,79 @@ if [ $software = 'laravel' ];
 then
   rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/storage/app/ storage/app/
 fi
+if [ $software = 'statamic' ];
+then
+  rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/public/assets/ public/assets/
+fi
 echo ''
 
-# Step 3: Export database
-echo '3/6 Export database'
-echo '-------------------'
-if [ $hoster = 'mittwald' ];
+# Synchronize texts
+if [ $software = 'statamic' ];
 then
-    serverPath='/html'
+  echo 'Synchronize texts'
+  echo '-----------------'
+  rsync -chavzP --delete --stats $serverAddressAndPath/content/ content/
+fi
+echo ''
+
+# Skip database synchronization, if remote database user is empty
+if [[ -z ${remoteDatabaseUser} ]];
+then
+  echo 'Skip database synchronization'
+  echo '-----------------------------'
 else
+  # Export database
+  echo 'Export database'
+  echo '---------------'
+  if [ $hoster = 'mittwald' ];
+  then
+    serverPath='/home/www/'$remoteServerUser
+  else
     serverPath='/home/forge/'$remoteServerHost
-fi
-ssh -T $remoteServerUser@$remoteServerHost << EOF
-  cd $serverPath/ && mkdir -p tmp
-  mysqldump --ignore-table=$remoteDatabaseName.be_sessions --ignore-table=$remoteDatabaseName.cache_md5params --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cf_cache_hash --ignore-table=$remoteDatabaseName.cf_cache_hash_tags --ignore-table=$remoteDatabaseName.cf_cache_imagesizes --ignore-table=$remoteDatabaseName.cf_cache_imagesizes_tags --ignore-table=$remoteDatabaseName.cf_cache_pages --ignore-table=$remoteDatabaseName.cf_cache_pages_tags --ignore-table=$remoteDatabaseName.cf_cache_pagesection --ignore-table=$remoteDatabaseName.cf_cache_pagesection_tags --ignore-table=$remoteDatabaseName.cf_cache_rootline --ignore-table=$remoteDatabaseName.cf_cache_rootline_tags --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap_tags --ignore-table=$remoteDatabaseName.cf_extbase_object --ignore-table=$remoteDatabaseName.cf_extbase_object_tags --ignore-table=$remoteDatabaseName.cf_extbase_reflection --ignore-table=$remoteDatabaseName.cf_extbase_reflection_tags --ignore-table=$remoteDatabaseName.tx_extensionmanager_domain_model_extension --ignore-table=$remoteDatabaseName.sys_log --ignore-table=$remoteDatabaseName.sys_domain --user="$remoteDatabaseUser" --password='$remoteDatabasePassword' --host="$remoteDatabaseHost" $remoteDatabaseName > tmp/$databaseFilename
-EOF
-scp $remoteServerUser@$remoteServerHost:$serverPath'/tmp/'$databaseFilename ./
-echo ''
+  fi
+  ssh -T $remoteServerUser@$remoteServerHost "
+    cd $serverPath/ && mkdir -p tmp
+    mysqldump --ignore-table=$remoteDatabaseName.be_sessions --ignore-table=$remoteDatabaseName.cache_md5params --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cf_cache_hash --ignore-table=$remoteDatabaseName.cf_cache_hash_tags --ignore-table=$remoteDatabaseName.cf_cache_imagesizes --ignore-table=$remoteDatabaseName.cf_cache_imagesizes_tags --ignore-table=$remoteDatabaseName.cf_cache_pages --ignore-table=$remoteDatabaseName.cf_cache_pages_tags --ignore-table=$remoteDatabaseName.cf_cache_pagesection --ignore-table=$remoteDatabaseName.cf_cache_pagesection_tags --ignore-table=$remoteDatabaseName.cf_cache_rootline --ignore-table=$remoteDatabaseName.cf_cache_rootline_tags --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap_tags --ignore-table=$remoteDatabaseName.cf_extbase_object --ignore-table=$remoteDatabaseName.cf_extbase_object_tags --ignore-table=$remoteDatabaseName.cf_extbase_reflection --ignore-table=$remoteDatabaseName.cf_extbase_reflection_tags --ignore-table=$remoteDatabaseName.tx_extensionmanager_domain_model_extension --ignore-table=$remoteDatabaseName.sys_log --ignore-table=$remoteDatabaseName.sys_domain --user="$remoteDatabaseUser" --password='$remoteDatabasePassword' --host="$remoteDatabaseHost" $remoteDatabaseName > tmp/$databaseFilename
+  "
+  scp $remoteServerUser@$remoteServerHost:$serverPath'/tmp/'$databaseFilename ./
+  echo ''
 
-# Step 4: Import database
-echo '4/6 Import database'
-echo '-------------------'
-if [ $environment = 'docker' ];
-then
-  docker cp $databaseFilename $dockerDatabaseHost:/var/www/html/$databaseFilename
-  docker-compose exec -T database mysql --user="$dockerDatabaseUser" --password="$dockerDatabasePassword" $dockerDatabaseName < $databaseFilename
-fi
-if [ $environment = 'local' ];
-then
-  mysql --user="$localDatabaseUser" --password="$localDatabasePassword" --host="$localDatabaseHost" $localDatabaseName < $databaseFilename
-fi
-echo ''
+  # Import database
+  echo 'Import database'
+  echo '---------------'
+  if [ $environment = 'docker' ];
+  then
+    docker cp $databaseFilename $dockerDatabaseHost:/var/www/html/$databaseFilename
+    docker-compose exec -T database mysql --user="$dockerDatabaseUser" --password="$dockerDatabasePassword" $dockerDatabaseName < $databaseFilename
+  fi
+  if [ $environment = 'local' ];
+  then
+    mysql --user="$localDatabaseUser" --password="$localDatabasePassword" --host="$localDatabaseHost" $localDatabaseName < $databaseFilename
+  fi
+  echo ''
 
-# Step 5: Clean up
-echo '5/6 Clean up'
-echo '------------'
-rm $databaseFilename
-echo 'Local SQL file was removed.'
-if [ $hoster = 'mittwald' ];
-then
-    ssh -T $remoteServerUser@$remoteServerHost << EOF
+  # Clean up database files
+  echo 'Clean up database files'
+  echo '-----------------------'
+  rm $databaseFilename
+  echo 'Local SQL file was removed.'
+  if [ $hoster = 'mittwald' ];
+  then
+    ssh -T $remoteServerUser@$remoteServerHost "
     rm /home/www/$remoteServerUser/tmp/$databaseFilename
-EOF
-else
-    ssh -T $remoteServerUser@$remoteServerHost << EOF
+    "
+  else
+    ssh -T $remoteServerUser@$remoteServerHost "
     rm /home/forge/$remoteServerHost/tmp/$databaseFilename
-EOF
+    "
+  fi
+  echo 'Remote SQL file was removed.'
+  echo ''
 fi
-echo 'Remote SQL file was removed.'
-echo ''
 
-# Step 6: Future help
-echo '6/6 Future help'
-echo '----------------------'
+# Future help
+echo 'Future help'
+echo '-----------'
 echo 'Use this command in the future:'
 if [ $environment = 'docker' ];
 then
