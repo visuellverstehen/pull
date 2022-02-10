@@ -92,9 +92,9 @@ else
 fi
 if [[ -z ${software} ]];
 then
-  read -p 'Software [typo3|laravel|statamic]: ' software
+  read -p 'Software [typo3|laravel|statamic|shopware6]: ' software
 else
-  echo 'Software [typo3|laravel|statamic]: '$software
+  echo 'Software [typo3|laravel|statamic|shopware6]: '$software
 fi
 if [[ -z ${hoster} ]];
 then
@@ -224,6 +224,10 @@ fi
 if [ $software = 'statamic' ];
 then
   rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/public/assets/ public/assets/
+fi
+if [ $software = 'shopware6' ];
+then
+  rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include="*.webp" --include='*/' --exclude="*" $serverAddressAndPath/public/media/ public/media/
 fi
 echo ''
 
