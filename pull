@@ -197,7 +197,7 @@ databaseFilename='export-'$(date +%s)'.sql'
 echo 'Database filename:' $databaseFilename
 echo ''
 
-# Set ssh port default to 22
+# Set SSH port default to 22
 if [[ -z ${remoteServerPort} ]];
 then
     remoteServerPort=22
