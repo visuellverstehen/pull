@@ -18,6 +18,7 @@ while [ "$1" != "" ]; do
           echo '  --vvcode'
           echo '  --remote-server-user'
           echo '  --remote-server-host'
+          echo '  --remote-server-port'
           echo '  --exclude-path'
           echo '  --remote-database-user'
           echo '  --remote-database-password'
@@ -42,6 +43,9 @@ while [ "$1" != "" ]; do
           ;;
         --remote-server-host)
           remoteServerHost=$value
+          ;;
+        --remote-server-port)
+          remoteServerPort=$value
           ;;
         --exclude-path)
           excludePath=$value
@@ -120,6 +124,12 @@ then
 else
   echo 'Remote server host: '$remoteServerHost
 fi
+if [[ -z ${remoteServerPort} ]];
+then
+  read -p 'Remote server port [default 22]: ' remoteServerPort
+else
+  echo 'Remote server port [default 22]: '$remoteServerPort
+fi
 if [[ -z ${remoteDatabaseUser} ]];
 then
   read -p 'Remote database user: ' remoteDatabaseUser
@@ -187,6 +197,12 @@ databaseFilename='export-'$(date +%s)'.sql'
 echo 'Database filename:' $databaseFilename
 echo ''
 
+# Set SSH port default to 22
+if [[ -z ${remoteServerPort} ]];
+then
+    remoteServerPort=22
+fi
+
 if [ $hoster = 'mittwald' ];
 then
   if [ $software = 'laravel' ];
@@ -215,15 +231,15 @@ then
     webDirectory=public
   fi
 
-  rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/$webDirectory/fileadmin/ $webDirectory/fileadmin/
+  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/$webDirectory/fileadmin/ $webDirectory/fileadmin/
 fi
 if [ $software = 'laravel' ];
 then
-  rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/storage/app/ storage/app/
+  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/storage/app/ storage/app/
 fi
 if [ $software = 'statamic' ];
 then
-  rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/public/assets/ public/assets/
+  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/public/assets/ public/assets/
 fi
 echo ''
 
@@ -232,7 +248,7 @@ if [ $software = 'statamic' ];
 then
   echo 'Synchronize texts'
   echo '-----------------'
-  rsync -chavzP --delete --stats $serverAddressAndPath/content/ content/
+  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats $serverAddressAndPath/content/ content/
 fi
 echo ''
 
@@ -251,11 +267,11 @@ else
   else
     serverPath='/home/forge/'$remoteServerHost
   fi
-  ssh -T $remoteServerUser@$remoteServerHost "
+  ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
     cd $serverPath/ && mkdir -p tmp
     mysqldump --ignore-table=$remoteDatabaseName.be_sessions --ignore-table=$remoteDatabaseName.cache_md5params --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cf_cache_hash --ignore-table=$remoteDatabaseName.cf_cache_hash_tags --ignore-table=$remoteDatabaseName.cf_cache_imagesizes --ignore-table=$remoteDatabaseName.cf_cache_imagesizes_tags --ignore-table=$remoteDatabaseName.cf_cache_pages --ignore-table=$remoteDatabaseName.cf_cache_pages_tags --ignore-table=$remoteDatabaseName.cf_cache_pagesection --ignore-table=$remoteDatabaseName.cf_cache_pagesection_tags --ignore-table=$remoteDatabaseName.cf_cache_rootline --ignore-table=$remoteDatabaseName.cf_cache_rootline_tags --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap_tags --ignore-table=$remoteDatabaseName.cf_extbase_object --ignore-table=$remoteDatabaseName.cf_extbase_object_tags --ignore-table=$remoteDatabaseName.cf_extbase_reflection --ignore-table=$remoteDatabaseName.cf_extbase_reflection_tags --ignore-table=$remoteDatabaseName.tx_extensionmanager_domain_model_extension --ignore-table=$remoteDatabaseName.sys_log --ignore-table=$remoteDatabaseName.sys_domain --user="$remoteDatabaseUser" --password='$remoteDatabasePassword' --host="$remoteDatabaseHost" $remoteDatabaseName > tmp/$databaseFilename
   "
-  scp $remoteServerUser@$remoteServerHost:$serverPath'/tmp/'$databaseFilename ./
+  scp -P $remoteServerPort $remoteServerUser@$remoteServerHost:$serverPath'/tmp/'$databaseFilename ./
   echo ''
 
   # Import database
@@ -279,11 +295,11 @@ else
   echo 'Local SQL file was removed.'
   if [ $hoster = 'mittwald' ];
   then
-    ssh -T $remoteServerUser@$remoteServerHost "
+    ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
     rm /home/www/$remoteServerUser/tmp/$databaseFilename
     "
   else
-    ssh -T $remoteServerUser@$remoteServerHost "
+    ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
     rm /home/forge/$remoteServerHost/tmp/$databaseFilename
     "
   fi
@@ -297,10 +313,10 @@ echo '-----------'
 echo 'Use this command in the future:'
 if [ $environment = 'docker' ];
 then
-  echo './vendor/bin/pull --environment="'$environment'" --remote-server-user="'$remoteServerUser'" --remote-server-host="'$remoteServerHost'" --vvcode="'$vvcode'" --exclude-path="'$excludePath'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'" --hoster="'$hoster'"'
+  echo './vendor/bin/pull --environment="'$environment'" --remote-server-user="'$remoteServerUser'" --remote-server-host="'$remoteServerHost'" --remote-server-port="'$remoteServerPort'" --vvcode="'$vvcode'" --exclude-path="'$excludePath'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'" --hoster="'$hoster'"'
 fi
 if [ $environment = 'local' ];
 then
-  echo './vendor/bin/pull --environment="'$environment'" --remote-server-user="'$remoteServerUser'" --remote-server-host="'$remoteServerHost'" --vvcode="'$vvcode'" --exclude-path="'$excludePath'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'" --hoster="'$hoster'" --local-database-user="'$localDatabaseUser'" --local-database-password="'$localDatabasePassword'" --local-database-host="'$localDatabaseHost'" --local-database-name="'$localDatabaseName'"'
+  echo './vendor/bin/pull --environment="'$environment'" --remote-server-user="'$remoteServerUser'" --remote-server-host="'$remoteServerHost'" --remote-server-port="'$remoteServerPort'" --vvcode="'$vvcode'" --exclude-path="'$excludePath'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'" --hoster="'$hoster'" --local-database-user="'$localDatabaseUser'" --local-database-password="'$localDatabasePassword'" --local-database-host="'$localDatabaseHost'" --local-database-name="'$localDatabaseName'"'
 fi
 echo ''
