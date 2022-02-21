@@ -224,7 +224,14 @@ echo 'Synchronize images'
 echo '-----------------'
 if [ $software = 'typo3' ];
 then
-  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/web/fileadmin/ web/fileadmin/
+  # Check which directory is used for public files
+  webDirectory=web
+  if [ -d "public" ];
+  then
+    webDirectory=public
+  fi
+
+  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/$webDirectory/fileadmin/ $webDirectory/fileadmin/
 fi
 if [ $software = 'laravel' ];
 then
