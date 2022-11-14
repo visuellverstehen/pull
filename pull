@@ -231,7 +231,7 @@ then
     webDirectory=public
   fi
 
-  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/$webDirectory/fileadmin/ $webDirectory/fileadmin/
+  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include="*.youtube" --include='*/' --exclude="*" $serverAddressAndPath/$webDirectory/fileadmin/ $webDirectory/fileadmin/
 fi
 if [ $software = 'laravel' ];
 then
