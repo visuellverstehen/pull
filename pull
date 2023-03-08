@@ -231,19 +231,19 @@ then
     webDirectory=public
   fi
 
-  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include="*.youtube" --include='*/' --exclude="*" $serverAddressAndPath/$webDirectory/fileadmin/ $webDirectory/fileadmin/
+  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.JPG" --include="*.jpeg" --include="*.png" --include="*.PNG" --include="*.gif" --include="*.svg" --include="*.youtube" --include='*/' --exclude="*" $serverAddressAndPath/$webDirectory/fileadmin/ $webDirectory/fileadmin/
 fi
 if [ $software = 'laravel' ];
 then
-  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/storage/app/ storage/app/
+  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.JPG" --include="*.jpeg" --include="*.png" --include="*.PNG" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/storage/app/ storage/app/
 fi
 if [ $software = 'statamic' ];
 then
-  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/public/assets/ public/assets/
+  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.JPG" --include="*.jpeg" --include="*.png" --include="*.PNG" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/public/assets/ public/assets/
 fi
 if [ $software = 'shopware6' ];
 then
-  rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.jpeg" --include="*.png" --include="*.gif" --include="*.svg" --include="*.webp" --include='*/' --exclude="*" $serverAddressAndPath/public/media/ public/media/
+  rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.JPG" --include="*.jpeg" --include="*.png" --include="*.PNG" --include="*.gif" --include="*.svg" --include="*.webp" --include='*/' --exclude="*" $serverAddressAndPath/public/media/ public/media/
 fi
 echo ''
 
