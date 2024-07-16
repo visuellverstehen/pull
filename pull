@@ -3,6 +3,10 @@ echo 'pull'
 echo '===='
 echo ''
 
+if test -f "./.pull"; then
+    source ./.pull
+fi
+
 # Handle parameter
 while [ "$1" != "" ]; do
     parameter=`echo $1 | awk -F= '{print $1}'`
@@ -315,6 +319,7 @@ fi
 echo 'Future help'
 echo '-----------'
 echo 'Use this command in the future:'
+
 if [ $environment = 'docker' ];
 then
   echo './vendor/bin/pull --environment="'$environment'" --remote-server-user="'$remoteServerUser'" --remote-server-host="'$remoteServerHost'" --remote-server-port="'$remoteServerPort'" --vvcode="'$vvcode'" --exclude-path="'$excludePath'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'" --hoster="'$hoster'"'
@@ -323,4 +328,24 @@ if [ $environment = 'local' ];
 then
   echo './vendor/bin/pull --environment="'$environment'" --remote-server-user="'$remoteServerUser'" --remote-server-host="'$remoteServerHost'" --remote-server-port="'$remoteServerPort'" --vvcode="'$vvcode'" --exclude-path="'$excludePath'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'" --hoster="'$hoster'" --local-database-user="'$localDatabaseUser'" --local-database-password="'$localDatabasePassword'" --local-database-host="'$localDatabaseHost'" --local-database-name="'$localDatabaseName'"'
 fi
+echo ''
+# Write cache file
+echo 'Saving configuration in cache file'
+echo $(pwd)'/.pull'
+echo "environment=$environment" > .pull
+echo "software=$software" >> .pull
+echo "hoster=$hoster" >> .pull
+echo "vvcode=$vvcode" >> .pull
+echo "remoteServerUser=$remoteServerUser" >> .pull
+echo "remoteServerHost=$remoteServerHost" >> .pull
+echo "remoteServerPort=$remoteServerPort" >> .pull
+echo "excludePath=$excludePath" >> .pull
+echo "remoteDatabaseUser=$remoteDatabaseUser" >> .pull
+echo "remoteDatabasePassword=$remoteDatabasePassword" >> .pull
+echo "remoteDatabaseHost=$remoteDatabaseHost" >> .pull
+echo "remoteDatabaseName=$remoteDatabaseName" >> .pull
+echo "localDatabaseUser=$localDatabaseUser" >> .pull
+echo "localDatabasePassword=$localDatabasePassword" >> .pull
+echo "localDatabaseHost=$localDatabaseHost" >> .pull
+echo "localDatabaseName=$localDatabaseName" >> .pull
 echo ''
