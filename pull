@@ -1,7 +1,12 @@
 #!/bin/bash
-echo 'pull'
-echo '===='
-echo ''
+
+# include custom functions
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+source $SCRIPT_DIR/functions
+
+# Start pull script
+color green '⬇️  pull'
+hr
 
 # Handle parameter
 while [ "$1" != "" ]; do
@@ -9,37 +14,22 @@ while [ "$1" != "" ]; do
     value=`echo $1 | awk -F= '{print $2}'`
     case $parameter in
         --help)
-          echo 'Help'
-          echo '----'
-          echo 'Possible parameter:'
-          echo '  --environment'
-          echo '  --software'
-          echo '  --hoster'
-          echo '  --vvcode'
-          echo '  --remote-server-user'
-          echo '  --remote-server-host'
-          echo '  --remote-server-port'
-          echo '  --exclude-path'
-          echo '  --remote-database-user'
-          echo '  --remote-database-password'
-          echo '  --remote-database-host'
-          echo '  --remote-database-name'
+          color green 'Help'
+          el
+          color yellow 'Possible parameters:'
+          echo '  --software                the software that is used in this project [statamic|typo3]'
+          echo '  --vvcode                  six digit vvcode'
+          echo '  --remote-server-user      name of remote server user (defaults to "vvuser")'
+          echo '  --remote-server-host      remote server host'
+          echo '  --remote-server-port      remote server port (defaults to 22)'
+          echo '  --exclude-path            path to exclude'
           exit 1
-          ;;
-        --environment)
-          environment=$value
           ;;
         --software)
           software=$value
           ;;
-        --hoster)
-          hoster=$value
-          ;;
         --vvcode)
           vvcode=$value
-          ;;
-        --remote-server-user)
-          remoteServerUser=$value
           ;;
         --remote-server-host)
           remoteServerHost=$value
@@ -49,30 +39,6 @@ while [ "$1" != "" ]; do
           ;;
         --exclude-path)
           excludePath=$value
-          ;;
-        --remote-database-user)
-          remoteDatabaseUser=$value
-          ;;
-        --remote-database-password)
-          remoteDatabasePassword=$value
-          ;;
-        --remote-database-host)
-          remoteDatabaseHost=$value
-          ;;
-        --remote-database-name)
-          remoteDatabaseName=$value
-          ;;
-        --local-database-user)
-          localDatabaseUser=$value
-          ;;
-        --local-database-password)
-          localDatabasePassword=$value
-          ;;
-        --local-database-host)
-          localDatabaseHost=$value
-          ;;
-        --local-database-name)
-          localDatabaseName=$value
           ;;
         *)
           echo 'Error'
@@ -86,116 +52,39 @@ while [ "$1" != "" ]; do
 done
 
 # Gather parameters
-echo 'Gather parameters'
-echo '-----------------'
-if [[ -z ${environment} ]];
-then
-  read -p 'Environment [docker|local]: ' environment
-else
-  echo 'Environment [docker|local]: '$environment
-fi
+headline '📋 Gather parameters'
 if [[ -z ${software} ]];
 then
-  read -p 'Software [typo3|laravel|statamic|shopware6]: ' software
+  read -p 'Software [statamic|typo3]: ' software
 else
-  echo 'Software [typo3|laravel|statamic|shopware6]: '$software
-fi
-if [[ -z ${hoster} ]];
-then
-  read -p 'Hoster [mittwald|forge]: ' hoster
-else
-  echo 'Hoster [mittwald|forge]: '$hoster
+  echo 'Software:                               '$software
 fi
 if [[ -z ${vvcode} ]];
 then
   read -p 'vvcode: ' vvcode
 else
-  echo 'vvcode: '$vvcode
-fi
-if [[ -z ${remoteServerUser} ]];
-then
-  read -p 'Remote server user: ' remoteServerUser
-else
-  echo 'Remote server user: '$remoteServerUser
+  echo 'vvcode:                                 '$vvcode
 fi
 if [[ -z ${remoteServerHost} ]];
 then
   read -p 'Remote server host: ' remoteServerHost
 else
-  echo 'Remote server host: '$remoteServerHost
+  echo 'Remote server host:                     '$remoteServerHost
 fi
 if [[ -z ${remoteServerPort} ]];
 then
   read -p 'Remote server port [default 22]: ' remoteServerPort
 else
-  echo 'Remote server port [default 22]: '$remoteServerPort
-fi
-if [[ -z ${remoteDatabaseUser} ]];
-then
-  read -p 'Remote database user: ' remoteDatabaseUser
-else
-  echo 'Remote database user: '$remoteDatabaseUser
-fi
-if [[ -z ${remoteDatabasePassword} ]];
-then
-  read -p 'Remote database password: ' remoteDatabasePassword
-else
-  echo 'Remote database password: '$remoteDatabasePassword
-fi
-if [[ -z ${remoteDatabaseHost} ]];
-then
-  read -p 'Remote database host: ' remoteDatabaseHost
-else
-  echo 'Remote database host: '$remoteDatabaseHost
-fi
-if [[ -z ${remoteDatabaseName} ]];
-then
-  read -p 'Remote database name: ' remoteDatabaseName
-else
-  echo 'Remote database name: '$remoteDatabaseName
+  echo 'Remote server port [default 22]:        '$remoteServerPort
 fi
 echo 'Exclude path: '$excludePath
-if [ $environment = 'docker' ];
-then
-  dockerDatabaseUser=$vvcode
-  echo 'Docker database user: '$dockerDatabaseUser
-  dockerDatabasePassword=$vvcode
-  echo 'Docker database password: '$dockerDatabasePassword
-  dockerDatabaseHost=$vvcode'_database'
-  echo 'Docker database host: '$dockerDatabaseHost
-  dockerDatabaseName=$vvcode
-  echo 'Docker database name: '$dockerDatabaseName
-fi
-if [ $environment = 'local' ];
-then
-  if [[ -z ${localDatabaseUser} ]];
-  then
-    read -p 'Local database user: ' localDatabaseUser
-  else
-    echo 'Local database user: '$localDatabaseUser
-  fi
-  if [[ -z ${localDatabasePassword} ]];
-  then
-    read -p 'Local database password: ' localDatabasePassword
-  else
-    echo 'Local database password: '$localDatabasePassword
-  fi
-  if [[ -z ${localDatabaseHost} ]];
-  then
-    read -p 'Local database host: ' localDatabaseHost
-  else
-    echo 'Local database host: '$localDatabaseHost
-  fi
-  if [[ -z ${localDatabaseName} ]];
-  then
-    read -p 'Local database name: ' localDatabaseName
-  else
-    echo 'Local database name: '$localDatabaseName
-  fi
-fi
 databaseFilename='export-'$(date +%s)'.sql'
-echo 'Database filename:' $databaseFilename
+echo 'Database filename:                      '$databaseFilename
 echo ''
+
+validate_software
+catch 'Software is not valid. Please use one of the following:\statamic | typo3'
+validate_remote_host
 
 # Set SSH port default to 22
 if [[ -z ${remoteServerPort} ]];
@@ -203,124 +92,107 @@ then
     remoteServerPort=22
 fi
 
-if [ $hoster = 'mittwald' ];
-then
-  if [ $software = 'laravel' ];
-  then
-    serverAddressAndPath=$remoteServerUser@$remoteServerHost:/home/www/$remoteServerUser/html/laravel
-  fi
-  if [ $software = 'typo3' ];
-  then
-    serverAddressAndPath=$remoteServerUser@$remoteServerHost:/home/www/$remoteServerUser/html/typo3
-  fi
-else
-  serverAddressAndPath=$remoteServerUser@$remoteServerHost:/home/forge/$remoteServerHost
-fi
-echo 'Using the following server address and path:' $serverAddressAndPath
+remoteServerUser=vvuser
+serverPath=/home/vvuser/main
+serverAddressAndPath=$remoteServerUser@$remoteServerHost:$serverPath
+color yellow 'Using the following server address and path:'
+echo $serverAddressAndPath
 echo ''
 
 # Synchronize images
-echo 'Synchronize images'
-echo '-----------------'
+headline '🖼️ Synchronize images'
 if [ $software = 'typo3' ];
 then
-  # Check which directory is used for public files
-  webDirectory=web
-  if [ -d "public" ];
-  then
-    webDirectory=public
-  fi
+    # Check which directory is used for public files
+    webDirectory=web
+    if [ -d "public" ];
+    then
+        webDirectory=public
+    fi
 
-  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.JPG" --include="*.jpeg" --include="*.png" --include="*.PNG" --include="*.gif" --include="*.svg" --include="*.youtube" --include='*/' --exclude="*" $serverAddressAndPath/$webDirectory/fileadmin/ $webDirectory/fileadmin/
-fi
-if [ $software = 'laravel' ];
-then
-  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.JPG" --include="*.jpeg" --include="*.png" --include="*.PNG" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/storage/app/ storage/app/
+    # Extract fileadmin from docker container
+    ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
+        cd $serverPath/ && mkdir -p tmp
+        docker cp main-application-1:/var/www/html/$webDirectory/fileadmin/ tmp/
+    "
+    catch "Could not extract fileadmin."
+
+    # Download fileadmin
+    rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --exclude="_processed_" --exclude="_temp_" --include="*.jpg" --include="*.JPG" --include="*.jpeg" --include="*.png" --include="*.PNG" --include="*.gif" --include="*.svg" --include="*.youtube" --include='*/' --exclude="*" $serverAddressAndPath/tmp/fileadmin/ $webDirectory/fileadmin/
+    catch "Could not download fileadmin."
+    color green "Successfully downloaded fileadmin."
 fi
 if [ $software = 'statamic' ];
 then
-  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.JPG" --include="*.jpeg" --include="*.png" --include="*.PNG" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/public/assets/ public/assets/
-fi
-if [ $software = 'shopware6' ];
-then
-  rsync -chavzP --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.JPG" --include="*.jpeg" --include="*.png" --include="*.PNG" --include="*.gif" --include="*.svg" --include="*.webp" --include='*/' --exclude="*" $serverAddressAndPath/public/media/ public/media/
-fi
-echo ''
+    # Extract assets from docker container
+    ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
+        cd $serverPath/ && mkdir -p tmp
+        docker cp main-application-1:/var/www/html/public/assets/ tmp/
+    "
+    catch "Could not extract assets."
+    # Download assets
+    rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats `if [ '$excludePath' != '' ]; then echo --exclude="$excludePath"; fi` --include="*.jpg" --include="*.JPG" --include="*.jpeg" --include="*.png" --include="*.PNG" --include="*.gif" --include="*.svg" --include='*/' --exclude="*" $serverAddressAndPath/tmp/assets/ public/assets/
+    catch "Could not download assets."
+    color green "Successfully downloaded assets."
 
-# Synchronize texts
-if [ $software = 'statamic' ];
-then
-  echo 'Synchronize texts'
-  echo '-----------------'
-  rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats $serverAddressAndPath/content/ content/
-fi
-echo ''
+    # Extract statamics static files from docker container
+    headline '📝 Synchronize texts'
+    ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
+        cd $serverPath/ && mkdir -p tmp
+        docker cp main-application-1:/var/www/html/content/ tmp/
+    "
+    catch "Could not extract texts."
 
-# Skip database synchronization, if remote database user is empty
-if [[ -z ${remoteDatabaseUser} ]];
-then
-  echo 'Skip database synchronization'
-  echo '-----------------------------'
+    # Download texts
+    rsync -chavzP -e "ssh -p $remoteServerPort" --delete --stats $serverAddressAndPath/tmp/content/ content/
+    catch "Could not download texts."
+    color green "Successfully downloaded texts."
+fi
+
+# Export database
+headline '⬆️ Export database'
+if database_exists; then
+    remoteDatabaseName=$vvcode
+    remoteDatabaseUser=$vvcode
+    remoteDatabasePassword=$vvcode
+    remoteDatabaseHost=localhost
+
+    ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
+        cd $serverPath/ && mkdir -p tmp
+        (docker compose exec database mysqldump --ignore-table=$remoteDatabaseName.be_sessions --ignore-table=$remoteDatabaseName.cache_md5params --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cache_hash --ignore-table=$remoteDatabaseName.cache_hash_tags --ignore-table=$remoteDatabaseName.cache_imagesizes --ignore-table=$remoteDatabaseName.cache_imagesizes_tags --ignore-table=$remoteDatabaseName.cache_pages --ignore-table=$remoteDatabaseName.cache_pages_tags --ignore-table=$remoteDatabaseName.cache_pagesection --ignore-table=$remoteDatabaseName.cache_pagesection_tags --ignore-table=$remoteDatabaseName.cache_rootline --ignore-table=$remoteDatabaseName.cache_rootline_tags --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap_tags --ignore-table=$remoteDatabaseName.cf_extbase_object --ignore-table=$remoteDatabaseName.cf_extbase_object_tags --ignore-table=$remoteDatabaseName.cf_extbase_reflection --ignore-table=$remoteDatabaseName.cf_extbase_reflection_tags --ignore-table=$remoteDatabaseName.tx_extensionmanager_domain_model_extension --ignore-table=$remoteDatabaseName.sys_log --user="$remoteDatabaseUser" --password='$remoteDatabasePassword' --host="$remoteDatabaseHost" $remoteDatabaseName) > tmp/$databaseFilename
+    "
+    catch "Could not create a sql dump."
+    scp -P $remoteServerPort $remoteServerUser@$remoteServerHost:$serverPath'/tmp/'$databaseFilename ./
+    catch "Could not download database."
+
+    # Import database
+    headline '⬇️ Import database'
+    databaseUser=$vvcode
+    databaseName=$vvcode
+    databaseHost=$vvcode'_database'
+    databasePassword=$vvcode
+
+    docker cp $databaseFilename $databaseHost:/var/www/html/$databaseFilename
+    catch "Failed to import database."
+    docker-compose exec -T database mysql --user="$databaseUser" --password="$databasePassword" $databaseName < $databaseFilename
+    catch "Failed to import database."
 else
-  # Export database
-  echo 'Export database'
-  echo '---------------'
-  if [ $hoster = 'mittwald' ];
-  then
-    serverPath='/home/www/'$remoteServerUser
-  else
-    serverPath='/home/forge/'$remoteServerHost
-  fi
-  ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
-    cd $serverPath/ && mkdir -p tmp
-    mysqldump --ignore-table=$remoteDatabaseName.be_sessions --ignore-table=$remoteDatabaseName.cache_md5params --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cache_hash --ignore-table=$remoteDatabaseName.cache_hash_tags --ignore-table=$remoteDatabaseName.cache_imagesizes --ignore-table=$remoteDatabaseName.cache_imagesizes_tags --ignore-table=$remoteDatabaseName.cache_pages --ignore-table=$remoteDatabaseName.cache_pages_tags --ignore-table=$remoteDatabaseName.cache_pagesection --ignore-table=$remoteDatabaseName.cache_pagesection_tags --ignore-table=$remoteDatabaseName.cache_rootline --ignore-table=$remoteDatabaseName.cache_rootline_tags --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap_tags --ignore-table=$remoteDatabaseName.cf_extbase_object --ignore-table=$remoteDatabaseName.cf_extbase_object_tags --ignore-table=$remoteDatabaseName.cf_extbase_reflection --ignore-table=$remoteDatabaseName.cf_extbase_reflection_tags --ignore-table=$remoteDatabaseName.tx_extensionmanager_domain_model_extension --ignore-table=$remoteDatabaseName.sys_log --user="$remoteDatabaseUser" --password='$remoteDatabasePassword' --host="$remoteDatabaseHost" $remoteDatabaseName > tmp/$databaseFilename
-  "
-  scp -P $remoteServerPort $remoteServerUser@$remoteServerHost:$serverPath'/tmp/'$databaseFilename ./
-  echo ''
-
-  # Import database
-  echo 'Import database'
-  echo '---------------'
-  if [ $environment = 'docker' ];
-  then
-    docker cp $databaseFilename $dockerDatabaseHost:/var/www/html/$databaseFilename
-    docker-compose exec -T database mysql --user="$dockerDatabaseUser" --password="$dockerDatabasePassword" $dockerDatabaseName < $databaseFilename
-  fi
-  if [ $environment = 'local' ];
-  then
-    mysql --user="$localDatabaseUser" --password="$localDatabasePassword" --host="$localDatabaseHost" $localDatabaseName < $databaseFilename
-  fi
-  echo ''
-
-  # Clean up database files
-  echo 'Clean up database files'
-  echo '-----------------------'
-  rm $databaseFilename
-  echo 'Local SQL file was removed.'
-  if [ $hoster = 'mittwald' ];
-  then
-    ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
-    rm /home/www/$remoteServerUser/tmp/$databaseFilename
-    "
-  else
-    ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
-    rm /home/forge/$remoteServerHost/tmp/$databaseFilename
-    "
-  fi
-  echo 'Remote SQL file was removed.'
-  echo ''
+    color yellow "No database found, skipping database export."
 fi
+
+# Clean up database files
+headline '🧹 Clean up temporary files'
+rm $databaseFilename
+color green 'Local SQL file was removed.'
+ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
+    rm -rf $serverPath/tmp/
+"
+catch "Could not remove remote temporary files."
+color green 'Remote temporary files were removed.'
+echo ''
 
 # Future help
-echo 'Future help'
-echo '-----------'
+headline '🔜 Future help'
 echo 'Use this command in the future:'
-if [ $environment = 'docker' ];
-then
-  echo './vendor/bin/pull --environment="'$environment'" --remote-server-user="'$remoteServerUser'" --remote-server-host="'$remoteServerHost'" --remote-server-port="'$remoteServerPort'" --vvcode="'$vvcode'" --exclude-path="'$excludePath'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'" --hoster="'$hoster'"'
-fi
-if [ $environment = 'local' ];
-then
-  echo './vendor/bin/pull --environment="'$environment'" --remote-server-user="'$remoteServerUser'" --remote-server-host="'$remoteServerHost'" --remote-server-port="'$remoteServerPort'" --vvcode="'$vvcode'" --exclude-path="'$excludePath'" --remote-database-user="'$remoteDatabaseUser'" --remote-database-password="'$remoteDatabasePassword'" --remote-database-host="'$remoteDatabaseHost'" --remote-database-name="'$remoteDatabaseName'" --software="'$software'" --hoster="'$hoster'" --local-database-user="'$localDatabaseUser'" --local-database-password="'$localDatabasePassword'" --local-database-host="'$localDatabaseHost'" --local-database-name="'$localDatabaseName'"'
-fi
+color yellow './vendor/bin/pull --remote-server-host="'$remoteServerHost'" --remote-server-port="'$remoteServerPort'" --vvcode="'$vvcode'" --exclude-path="'$excludePath'" --software="'$software'"'
 echo ''
