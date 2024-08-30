@@ -185,12 +185,10 @@ if database_exists; then
     headline '⬇️ Import database'
     databaseUser=$vvcode
     databaseName=$vvcode
-    databaseHost=$vvcode'_database'
     databasePassword=$vvcode
-
-    docker cp $databaseFilename $databaseHost:/var/www/html/$databaseFilename
+    docker compose cp $databaseFilename database:/var/www/html/$databaseFilename
     catch "Failed to import database."
-    docker-compose exec -T database mysql --user="$databaseUser" --password="$databasePassword" $databaseName < $databaseFilename
+    docker compose exec -T database mysql --user="$databaseUser" --password="$databasePassword" $databaseName < $databaseFilename
     catch "Failed to import database."
 else
     color yellow "No database found, skipping database export."
