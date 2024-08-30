@@ -22,6 +22,7 @@ while [ "$1" != "" ]; do
           echo '  --remote-server-user      name of remote server user (defaults to "vvuser")'
           echo '  --remote-server-host      remote server host'
           echo '  --remote-server-port      remote server port (defaults to 22)'
+          echo '  --remote-server-folder    remote server folder (defaults to "main")'
           echo '  --exclude-path            path to exclude'
           exit 1
           ;;
@@ -36,6 +37,9 @@ while [ "$1" != "" ]; do
           ;;
         --remote-server-port)
           remoteServerPort=$value
+          ;;
+        --remote-server-folder)
+          remoteServerFolder=$value
           ;;
         --exclude-path)
           excludePath=$value
@@ -77,6 +81,12 @@ then
 else
   echo 'Remote server port [default 22]:        '$remoteServerPort
 fi
+if [[ -z ${remoteServerFolder} ]];
+then
+  read -p 'Remote server folder [default "main"]: ' remoteServerFolder
+else
+  echo 'Remote server folder [default "main"]:        '$remoteServerFolder
+fi
 echo 'Exclude path: '$excludePath
 databaseFilename='export-'$(date +%s)'.sql'
 echo 'Database filename:                      '$databaseFilename
@@ -92,8 +102,14 @@ then
     remoteServerPort=22
 fi
 
+# Set remote server folder to main if not set yet
+if [[ -z ${remoteServerFolder} ]];
+then
+    remoteServerFolder="main"
+fi
+
 remoteServerUser=vvuser
-serverPath=/home/vvuser/main
+serverPath=/home/vvuser/$remoteServerFolder
 serverAddressAndPath=$remoteServerUser@$remoteServerHost:$serverPath
 color yellow 'Using the following server address and path:'
 echo $serverAddressAndPath
