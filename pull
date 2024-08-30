@@ -71,7 +71,7 @@ else
 fi
 if [[ -z ${remoteServerHost} ]];
 then
-  read -p 'Remote server host: ' remoteServerHost
+  read -p 'Remote server host [default '$vvcode'.visuel.dev]: ' remoteServerHost
 else
   echo 'Remote server host:                     '$remoteServerHost
 fi
@@ -94,7 +94,6 @@ echo ''
 
 validate_software
 catch 'Software is not valid. Please use one of the following:\statamic | typo3'
-validate_remote_host
 
 # Set SSH port default to 22
 if [[ -z ${remoteServerPort} ]];
@@ -107,6 +106,14 @@ if [[ -z ${remoteServerFolder} ]];
 then
     remoteServerFolder="main"
 fi
+
+# Set remote server to visuel.dev domain if not set yet
+if [[ -z ${remoteServerHost} ]];
+then
+    remoteServerHost="$vvcode.visuel.dev"
+fi
+
+validate_remote_host
 
 remoteServerUser=vvuser
 serverPath=/home/vvuser/$remoteServerFolder
