@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# Draw horizontal line
+# https://www.reddit.com/r/bash/comments/13u9fnj/comment/jlzl9p6/
+hr ()
+{
+    printf -- '%*s\n' "${1:-40}" | tr ' ' "${2:-─}"
+}
+
+# Prints a blue headline with a horizontal line
+headline ()
+{
+    echo ''
+    color blue "$1"
+    hr 20
+    echo ''
+}
+
+# Color function for prettier outputs
+color () {
+    RED='\033[0;31m'
+    YELLOW='\033[1;33m'
+    BLUE='\033[0;34m'
+    GREEN='\033[0;32m'
+    NC='\033[0m'
+
+    case $1 in
+    "yellow")
+        COLOR=$YELLOW
+        ;;
+
+    "blue")
+        COLOR=$BLUE
+        ;;
+
+    "red")
+        COLOR=$RED
+        ;;
+
+    "green")
+        COLOR=$GREEN
+        ;;
+
+    *)
+        COLOR=$NC
+        ;;
+    esac
+
+    echo -e "${COLOR}$2${NC}"
+}
+
+# Print error message and stop script execution
+error () {
+    color red "$1"
+    exit
+}
+
+# Check if an error occured, throw given error if something went wrong
+catch () {
+    if [[ $? != 0 ]]; then
+        error "🚨 $1"
+    fi
+}
+
+# Validate software type
+validate_software () {
+    list="statamic typo3"
+    [[ $list =~ (^|[[:space:]])$software($|[[:space:]]) ]] && return 0 || return 1
+}
+
+# Validates if the remote host is accessible
+validate_remote_host () {
+    ping -c 1 $remoteServerHost &>/dev/null
+    catch "Could not connect to remote server host."
+}
+
+# Checks if a database container exists on the remote host
+database_exists () {
+    ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "docker container inspect main-database-1" &>/dev/null
+}
