@@ -180,9 +180,17 @@ if database_exists; then
     remoteDatabasePassword=$vvcode
     remoteDatabaseHost=localhost
 
+    if is_mariadb; then
+        dump=mariadb-dump
+        dbsoftware=mariadb
+    else
+        dump=mysqldump
+        dbsoftware=mysql
+    fi
+
     ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
         cd $serverPath/ && mkdir -p tmp
-        (docker compose exec database mysqldump --no-tablespaces --ignore-table=$remoteDatabaseName.be_sessions --ignore-table=$remoteDatabaseName.cache_md5params --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cache_hash --ignore-table=$remoteDatabaseName.cache_hash_tags --ignore-table=$remoteDatabaseName.cache_imagesizes --ignore-table=$remoteDatabaseName.cache_imagesizes_tags --ignore-table=$remoteDatabaseName.cache_pages --ignore-table=$remoteDatabaseName.cache_pages_tags --ignore-table=$remoteDatabaseName.cache_pagesection --ignore-table=$remoteDatabaseName.cache_pagesection_tags --ignore-table=$remoteDatabaseName.cache_rootline --ignore-table=$remoteDatabaseName.cache_rootline_tags --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap_tags --ignore-table=$remoteDatabaseName.cf_extbase_object --ignore-table=$remoteDatabaseName.cf_extbase_object_tags --ignore-table=$remoteDatabaseName.cf_extbase_reflection --ignore-table=$remoteDatabaseName.cf_extbase_reflection_tags --ignore-table=$remoteDatabaseName.tx_extensionmanager_domain_model_extension --ignore-table=$remoteDatabaseName.sys_log --user="$remoteDatabaseUser" --password='$remoteDatabasePassword' --host="$remoteDatabaseHost" $remoteDatabaseName) > tmp/$databaseFilename
+        (docker compose exec database $dump --no-tablespaces --ignore-table=$remoteDatabaseName.be_sessions --ignore-table=$remoteDatabaseName.cache_md5params --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cache_hash --ignore-table=$remoteDatabaseName.cache_hash_tags --ignore-table=$remoteDatabaseName.cache_imagesizes --ignore-table=$remoteDatabaseName.cache_imagesizes_tags --ignore-table=$remoteDatabaseName.cache_pages --ignore-table=$remoteDatabaseName.cache_pages_tags --ignore-table=$remoteDatabaseName.cache_pagesection --ignore-table=$remoteDatabaseName.cache_pagesection_tags --ignore-table=$remoteDatabaseName.cache_rootline --ignore-table=$remoteDatabaseName.cache_rootline_tags --ignore-table=$remoteDatabaseName.cache_treelist --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap --ignore-table=$remoteDatabaseName.cf_extbase_datamapfactory_datamap_tags --ignore-table=$remoteDatabaseName.cf_extbase_object --ignore-table=$remoteDatabaseName.cf_extbase_object_tags --ignore-table=$remoteDatabaseName.cf_extbase_reflection --ignore-table=$remoteDatabaseName.cf_extbase_reflection_tags --ignore-table=$remoteDatabaseName.tx_extensionmanager_domain_model_extension --ignore-table=$remoteDatabaseName.sys_log --user="$remoteDatabaseUser" --password='$remoteDatabasePassword' --host="$remoteDatabaseHost" $remoteDatabaseName) > tmp/$databaseFilename
     "
     catch "Could not create a sql dump."
     scp -P $remoteServerPort $remoteServerUser@$remoteServerHost:$serverPath'/tmp/'$databaseFilename ./
@@ -195,7 +203,7 @@ if database_exists; then
     databasePassword=$vvcode
     docker compose cp $databaseFilename database:/var/www/html/$databaseFilename
     catch "Failed to import database."
-    docker compose exec -T database mysql --user="$databaseUser" --password="$databasePassword" $databaseName < $databaseFilename
+    docker compose exec -T database $dbsoftware --user="$databaseUser" --password="$databasePassword" $databaseName < $databaseFilename
     catch "Failed to import database."
 else
     color yellow "No database found, skipping database export."
