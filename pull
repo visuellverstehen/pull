@@ -284,7 +284,7 @@ else
   if [ $environment = 'docker' ];
   then
     docker cp $databaseFilename $dockerDatabaseHost:/var/www/html/$databaseFilename
-    docker-compose exec -T database mysql --user="$dockerDatabaseUser" --password="$dockerDatabasePassword" $dockerDatabaseName < $databaseFilename
+    docker compose exec -T database mysql --user="$dockerDatabaseUser" --password="$dockerDatabasePassword" $dockerDatabaseName < $databaseFilename
   fi
   if [ $environment = 'local' ];
   then
