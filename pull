@@ -117,6 +117,7 @@ validate_remote_host
 
 remoteServerUser=vvuser
 serverPath=/home/vvuser/$remoteServerFolder
+applicationImage=$remoteServerFolder-application-1
 serverAddressAndPath=$remoteServerUser@$remoteServerHost:$serverPath
 color yellow 'Using the following server address and path:'
 echo $serverAddressAndPath
@@ -136,7 +137,7 @@ then
     # Extract fileadmin from docker container
     ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
         cd $serverPath/ && mkdir -p tmp
-        docker cp main-application-1:/var/www/html/$webDirectory/fileadmin/ tmp/
+        docker cp $applicationImage:/var/www/html/$webDirectory/fileadmin/ tmp/
     "
     catch "Could not extract fileadmin."
 
@@ -150,7 +151,7 @@ then
     # Extract assets from docker container
     ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
         cd $serverPath/ && mkdir -p tmp
-        docker cp main-application-1:/var/www/html/public/assets/ tmp/
+        docker cp $applicationImage:/var/www/html/public/assets/ tmp/
     "
     catch "Could not extract assets."
     # Download assets
@@ -162,7 +163,7 @@ then
     headline '📝 Synchronize texts'
     ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
         cd $serverPath/ && mkdir -p tmp
-        docker cp main-application-1:/var/www/html/content/ tmp/
+        docker cp $applicationImage:/var/www/html/content/ tmp/
     "
     catch "Could not extract texts."
 
