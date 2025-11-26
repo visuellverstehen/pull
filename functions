@@ -76,7 +76,7 @@ validate_remote_host () {
 
 # Checks if a database container exists on the remote host
 database_exists () {
-    ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "docker container inspect main-database-1" &>/dev/null
+    ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "docker container inspect $remoteServerFolder-database-1" &>/dev/null
 }
 
 # Checks if the database container runs mariadb
