@@ -224,5 +224,5 @@ echo ''
 # Future help
 headline '🔜 Future help'
 echo 'Use this command in the future:'
-color yellow './vendor/bin/pull --remote-server-host="'$remoteServerHost'" --remote-server-port="'$remoteServerPort'" --vvcode="'$vvcode'" --exclude-path="'$excludePath'" --software="'$software'"'
+color yellow './vendor/bin/pull --remote-server-host="'$remoteServerHost'" --remote-server-port="'$remoteServerPort'" --remote-server-folder="'$remoteServerFolder'" --vvcode="'$vvcode'" --exclude-path="'$excludePath'" --software="'$software'"'
 echo ''
