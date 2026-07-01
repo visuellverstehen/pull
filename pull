@@ -174,12 +174,15 @@ then
 fi
 
 # Export database
-headline '⬆️ Export database'
+headline '⬇️ Import database by exporting database over SSH'
 if database_exists; then
     remoteDatabaseName=$vvcode
     remoteDatabaseUser=$vvcode
     remoteDatabasePassword=$vvcode
     remoteDatabaseHost=localhost
+    databaseUser=$vvcode
+    databaseName=$vvcode
+    databasePassword=$vvcode
 
     if is_mariadb; then
         dump=mariadb-dump
@@ -189,10 +192,6 @@ if database_exists; then
         dbsoftware=mysql
     fi
 
-    headline '⬇️ Import database by exporting database over SSH'
-    databaseUser=$vvcode
-    databaseName=$vvcode
-    databasePassword=$vvcode
     ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
         cd $serverPath/ &&
         docker compose exec database $dump \
