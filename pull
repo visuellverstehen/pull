@@ -229,8 +229,6 @@ fi
 
 # Clean up database files
 headline '🧹 Clean up temporary files'
-rm $databaseFilename
-color green 'Local SQL file was removed.'
 ssh -T $remoteServerUser@$remoteServerHost -p $remoteServerPort "
     rm -rf $serverPath/tmp/
 "
